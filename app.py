@@ -106,7 +106,7 @@ def dashboard():
     expense = cursor.fetchone()['total_expense'] or 0
 
     cursor.execute("""
-        SELECT t.title, t.amount, t.date, c.name AS category, c.type
+        SELECT t.title, t.amount, t.date, c.name AS category, c.type, t.notes
         FROM transactions t
         JOIN categories c ON t.categoryID = c.categoryID
         WHERE t.userID = %s
@@ -126,6 +126,74 @@ def dashboard():
         balance=balance,
         recent_transactions=recent
     )
+
+
+@app.route('/categories', methods=['GET', 'POST'])
+def manage_categories():
+    if 'userID' not in session:
+        return redirect('/login')
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    if request.method == 'POST':
+        name = request.form['name']
+        type_ = request.form['type']
+        user_id = session['userID']
+
+        cursor.execute(
+            "INSERT INTO categories (name, type, userID) "
+            "VALUES (%s, %s, %s)",
+            (name, type_, user_id)
+        )
+        conn.commit()
+        flash('Category added successfully!', 'success')
+        return redirect('/categories')
+
+    cursor.execute(
+        "SELECT * FROM categories WHERE userID = %s OR userID IS NULL",
+        (session['userID'],)
+    )
+    categories = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return render_template('categories.html', categories=categories)
+
+
+@app.route('/transactions', methods=['GET', 'POST'])
+def add_transactions():
+    if 'userID' not in session:
+        return redirect('/login')
+    user_id = session['userID']
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    if request.method == 'POST':
+        title = request.form['title']
+        amount = float(request.form['amount'])
+        date = request.form['date']
+        notes = request.form['notes']
+        category_id = request.form['categoryID']
+
+        cursor.execute(
+            "INSERT INTO transactions (title, amount, date, notes,"
+            " categoryID, userID) "
+            "VALUES (%s, %s, %s, %s, %s, %s)",
+            (title, amount, date, notes, category_id, user_id)
+        )
+        conn.commit()
+        flash('Transaction added successfully!', 'success')
+        return redirect('/transactions')
+
+    cursor.execute(
+        "SELECT * FROM categories WHERE userID = %s OR userID IS NULL",
+        (user_id,)
+    )
+    categories = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+    return render_template('transactions.html', categories=categories)
 
 
 @app.route('/logout')

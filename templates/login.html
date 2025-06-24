@@ -1,32 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Login</title>
-    <style>
-        .success-message { color: green; }
-        .danger-message { color: red; }
-        .default-message { color: black; }
-    </style>
-    </head>
-    <body>
-        {% with messages = get_flashed_messages(with_categories=True) %}
-        {% if messages %}
-        {% for category, message in messages %}
-        <div class="{% if category == 'success' %}success-message{% elif category == 'danger' %}danger-message{% else %}default-message{% endif %}">
-            {{ message }}
-        </div>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
-        <h2>Login</h2>
-        <form method="POST">
-            Email: <input type="email" name="email" required><br><br>
-            Password: <input type="password" name="password" required><br><br>
-            <button type="submit">Login</button>
-        </form>
-        <p>New user? <a href="/register">Register here</a></p>
-    </body>
-    
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+  <div class="auth-container">
+    <h2>Login</h2>
+    {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="{{ category }}-message">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+    {% endwith %}
+    <form method="POST">
+      <label for="email">Email</label>
+      <input type="email" name="email" id="email" required>
+
+      <label for="password">Password</label>
+      <input type="password" name="password" id="password" required>
+
+      <button type="submit">Login</button>
+      <p>Don't have an account? <a href="/register">Register here</a></p>
+    </form>
+  </div>
+</body>
 </html>

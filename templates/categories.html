@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Manage Categories</title>
+        <link rel="stylesheet" href="../static/style.css">
+    </head>
+    <body>
+        {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="{% if category == 'success' %}success-message{% elif category == 'danger' %}danger-message{% else %}default-message{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        {% include 'navbar.html' %}
+
+        <div class="container">
+            <h2>Manage Categories</h2>
+            <form method="POST">
+                <label>Category Name:</label>
+                <input type="text" id="name" name="name" required>
+                <label">Type</label>
+                <select id="type" name="type" required>
+                    <option value="income">Income</option>
+                    <option value="expense">Expense</option>
+                </select>
+                <button type="submit">Add Category</button>
+            </form>
+
+            <hr>
+            <h3>Existing Categories</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in categories %}
+                    <tr>
+                        <td>{{ category.name }}</td>
+                        <td>{{ category.type }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </body>
+</html>

@@ -4,12 +4,53 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Dashboard</title>
-        <link rel="stylesheet" href="static/styles.css">
+        <link rel="stylesheet" href="../static/style.css">
     </head>
     <body>
-        <h2>Welcome to your Dashboard</h2>
-        <p>Hello, {{ session['name'] }}! This is your dashboard.</p>
-        <a href="/logout">Logout</a>
+        {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="{% if category == 'success' %}success-message{% elif category == 'danger' %}danger-message{% else %}default-message{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        {% include 'navbar.html' %}
+        <div class="dashboard-container">
+            <h2>Welcome to your Dashboard, {{ session['name'] }}!</h2>
+            <div class="stats">
+                <div class="card income">Income: ₹{{ income }}</div>
+                <div class="card expense">Expense: ₹{{ expense }}</div>
+                <div class="card balance">Balance: ₹{{ balance }}</div>
+            </div>
+            <h3>Recent Transactions</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Type</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tx in recent_transactions %}
+                    <tr>
+                        <td>{{ tx.title }}</td>
+                        <td>₹{{ tx.amount }}</td>
+                        <td>{{ tx.date }}</td>
+                        <td>{{ tx.category }}</td>
+                        <td>{{ tx.type }}</td>
+                        <td>{{ tx.notes }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <br>
+        </div>
     </body>
     
 </html>
