@@ -24,7 +24,58 @@
                 <div class="card expense">Expense: ₹{{ expense }}</div>
                 <div class="card balance">Balance: ₹{{ balance }}</div>
             </div>
-            <h3>Recent Transactions</h3>
+
+            <div class="filter-toggle-container">
+                <button id="toggleFilterBtn">Show Filters</button>
+                <div class="filter-form" style="display: none;" id="filterSection">
+                    <form method="GET" action="/dashboard" class="filter-form">
+                        <div class="filter-group">
+                            <label>Min amount</label>
+                            <input type="number" name="min_amount" value="{{ request.args.get('min_amount', '') }}" step="0.01">
+                        </div>
+                        <div class="filter-group">
+                            <label>Max amount</label>
+                            <input type="number" name="max_amount" value="{{ request.args.get('max_amount', '') }}" step="0.01">
+                        </div>
+                        <div class="filter-group">
+                            <label>Start date</label>
+                            <input type="date" name="start_date" value="{{ request.args.get('start_date', '') }}">
+                        </div>
+                        <div class="filter-group">
+                            <label>End date</label>
+                            <input type="date" name="end_date" value="{{ request.args.get('end_date', '') }}">
+                        </div>
+                        <div class="filter-group">
+                            <label>Category</label>
+                            <select name="categoryID">
+                                <option value="">All</option>
+                                {% for c in categories %}
+                                <option value="{{ c.categoryID }}" {% if request.args.get('categoryID') == c.categoryID %}selected{% endif %}>{{ c.name }} ({{ c.type }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Search</label>
+                            <input type="text" name="search_text" value="{{ request.args.get('search_text', '') }}" placeholder="Search by title or notes">
+                        </div>
+                        <div class="filter-group">
+                            <label>Type</label>
+                            <select name="type">
+                                <option value="">All</option>
+                                <option value="income" {% if request.args.get('type') == 'income' %}selected{% endif %}>Income</option>
+                                <option value="expense" {% if request.args.get('type') == 'expense' %}selected{% endif %}>Expense</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>&nbsp;</label>
+                        <button type="submit">Filter</button><br>
+                        <a href="/dashboard" class="reset-filter">Reset</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <h3>Transactions</h3>
             <table>
                 <thead>
                     <tr>
@@ -51,6 +102,18 @@
             </table>
             <br>
         </div>
+        <script>
+            const toggleFilterBtn = document.getElementById('toggleFilterBtn');
+            const filterSection = document.getElementById('filterSection');
+            toggleFilterBtn.addEventListener('click', () => {
+                if (filterSection.style.display === 'none' || filterSection.style.display === '') {
+                    filterSection.style.display = 'block';
+                    toggleFilterBtn.textContent = 'Hide Filters';
+                } else {
+                    filterSection.style.display = 'none';
+                    toggleFilterBtn.textContent = 'Show Filters';
+                }
+            });
+        </script>
     </body>
-    
 </html>

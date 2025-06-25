@@ -5,6 +5,7 @@ from flask import (
 from db_config import get_connection
 import hashlib
 import os
+from datetime import datetime
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -105,15 +106,55 @@ def dashboard():
     )
     expense = cursor.fetchone()['total_expense'] or 0
 
-    cursor.execute("""
-        SELECT t.title, t.amount, t.date, c.name AS category, c.type, t.notes
-        FROM transactions t
-        JOIN categories c ON t.categoryID = c.categoryID
-        WHERE t.userID = %s
-        ORDER BY t.date DESC
-        LIMIT 10
-    """, (user_id,))
-    recent = cursor.fetchall()
+    query = (
+        "SELECT t.*, c.name AS category, c.type "
+        "FROM transactions t "
+        "JOIN categories c ON t.categoryID = c.categoryID "
+        "WHERE t.userID = %s "
+    )
+    values = [user_id]
+    min_amount = request.args.get('min_amount')
+    max_amount = request.args.get('max_amount')
+    date_from = request.args.get('date_from')
+    date_to = request.args.get('date_to')
+    category_id = request.args.get('categoryID')
+    search_text = request.args.get('search_text')
+    type_filter = request.args.get('type')
+
+    if min_amount:
+        query += "AND t.amount >= %s "
+        values.append(float(min_amount))
+    if max_amount:
+        query += "AND t.amount <= %s "
+        values.append(float(max_amount))
+    if date_from:
+        query += "AND t.date >= %s "
+        values.append(datetime.strptime(date_from, '%Y-%m-%d'))
+    if date_to:
+        query += "AND t.date <= %s "
+        values.append(datetime.strptime(date_to, '%Y-%m-%d'))
+    if category_id:
+        query += "AND t.categoryID = %s "
+        values.append(int(category_id))
+    if search_text:
+        query += "AND (t.title LIKE %s OR t.notes LIKE %s) "
+        search_pattern = f"%{search_text}%"
+        values.append(search_pattern)
+        values.append(search_pattern)
+    if type_filter:
+        query += "AND c.type = %s "
+        values.append(type_filter)
+
+    query += "ORDER BY t.date DESC"
+
+    cursor.execute(query, values)
+    transactions = cursor.fetchall()
+
+    cursor.execute(
+        'SELECT * FROM categories WHERE userID = %s OR userID IS NULL',
+        (user_id,)
+    )
+    categories = cursor.fetchall()
 
     cursor.close()
     conn.close()
@@ -124,7 +165,8 @@ def dashboard():
         income=income,
         expense=expense,
         balance=balance,
-        recent_transactions=recent
+        recent_transactions=transactions,
+        categories=categories,
     )
 
 
@@ -164,6 +206,7 @@ def manage_categories():
 def add_transactions():
     if 'userID' not in session:
         return redirect('/login')
+
     user_id = session['userID']
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
@@ -171,7 +214,8 @@ def add_transactions():
     if request.method == 'POST':
         title = request.form['title']
         amount = float(request.form['amount'])
-        date = request.form['date']
+        raw_date = request.form['date']
+        date = datetime.strptime(raw_date, '%Y-%m-%dT%H:%M')
         notes = request.form['notes']
         category_id = request.form['categoryID']
 
