@@ -27,12 +27,12 @@
             <input type="number" name="amount" id="amount" step="0.01" required>
 
             <label for="date">Date</label>
-            <input type="date" name="date" id="date" required>
+            <input type="datetime-local" name="date" id="date" required>
 
             <label for="categoryID">Category</label>
             <select name="categoryID" id="categoryID" required>
-              {% for category in categories %}
-              <option value="{{ category.categoryID }}">{{ category.name }} ({{ category.type }})</option>
+              {% for c in categories %}
+              <option value="{{ c.categoryID }}">{{ c.name }} ({{ c.type }})</option>
               {% endfor %}
             </select>
 
