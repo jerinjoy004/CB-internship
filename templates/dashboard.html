@@ -91,7 +91,7 @@
                     {% for tx in recent_transactions %}
                     <tr>
                         <td>{{ tx.title }}</td>
-                        <td>₹{{ tx.amount }}</td>
+                        <td style="color: {% if tx.type=='income' %}green{% else %}red{% endif %};">₹{{ tx.amount }}</td>
                         <td>{{ tx.date }}</td>
                         <td>{{ tx.category }}</td>
                         <td>{{ tx.type }}</td>
