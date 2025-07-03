@@ -25,8 +25,8 @@
                 <input type="text" id="name" name="name" required>
                 <label">Type</label>
                 <select id="type" name="type" required>
-                    <option value="income">Income</option>
-                    <option value="expense">Expense</option>
+                    <option value="credit">credit</option>
+                    <option value="debit">debit</option>
                 </select>
                 <button type="submit">Add Category</button>
             </form>
@@ -38,6 +38,7 @@
                     <tr>
                         <th>Name</th>
                         <th>Type</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -45,10 +46,24 @@
                     <tr>
                         <td>{{ category.name }}</td>
                         <td>{{ category.type }}</td>
+                        <td>
+                            <form action="/edit_category/{{ category.categoryID }}" style="display: inline;">
+                                <button type="submit" style="background: none;border: none;color: #007bff;cursor:pointer;padding:0;">Edit</button>
+                            </form> | 
+                            <form action="/delete_category/{{ category.categoryID }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure?');">
+                                <button type="submit" style="background:none;border:none;color:#007bff;cursor:pointer;padding:0;">Delete</button>
+                            </form>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        <script>
+            function toggleMenu() {
+            document.getElementById('navLinks').classList.toggle('show');
+            }
+        </script>
+
     </body>
 </html>

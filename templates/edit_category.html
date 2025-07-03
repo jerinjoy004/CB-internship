@@ -1,0 +1,24 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Category</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <h2>Edit Category</h2><br><br>
+    <form action="" method="post">
+    <label for="">Name:</label>
+    <input type="text" name="name" id="name" value="{{ category.name }}" required><br>
+    <label for="">Type:</label>
+    <select name="type" id="type" required><br><br>
+        <option value="credit" {% if category.type == 'credit' %}selected{% endif %}>Credit</option>
+        <option value="debit" {% if category.type == 'debit' %}selected{% endif %}>Debit</option>
+    </select>
+    <button type="submit">Update Category</button><br>
+    <a href="/categories" class="reset-btn">Cancel</a><br>
+</form>
+</body>
+</html>
+
+

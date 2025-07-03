@@ -1,11 +1,17 @@
-
 <div class="navbar">
   <div><strong>Finance Manager</strong></div>
-  <div>
+  <div id="menuToggle" onclick="toggleMenu()" style="cursor:pointer;">☰</div>
+  <div id="navLinks" class="nav-links">
     <a href="/dashboard">Home</a>
     <a href="/categories">Categories</a>
     <a href="/transactions">Add Transaction</a>
     <a href="/report">Report</a>
     <a href="/logout">Logout</a>
   </div>
+  <script>
+  function toggleMenu() {
+    var navLinks = document.getElementById('navLinks');
+    navLinks.style.display = (navLinks.style.display === 'block') ? 'none' : 'block';
+  }
+  </script>
 </div>

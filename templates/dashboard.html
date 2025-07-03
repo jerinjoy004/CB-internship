@@ -20,13 +20,13 @@
         <div class="dashboard-container">
             <h2>Welcome to your Dashboard, {{ session['name'] }}!</h2>
             <div class="stats">
-                <div class="card income">Income: ₹{{ income }}</div>
-                <div class="card expense">Expense: ₹{{ expense }}</div>
+                <div class="card credit">credit: ₹{{ credit }}</div>
+                <div class="card debit">debit: ₹{{ debit }}</div>
                 <div class="card balance">Balance: ₹{{ balance }}</div>
             </div>
 
             <div class="filter-toggle-container">
-                <button id="toggleFilterBtn">Show Filters</button>
+                <!--<button id="toggleFilterBtn">Show Filters</button>-->
                 <div class="filter-form" style="display: none;" id="filterSection">
                     <form method="GET" action="/dashboard" class="filter-form">
                         <div class="filter-group">
@@ -62,8 +62,8 @@
                             <label>Type</label>
                             <select name="type">
                                 <option value="">All</option>
-                                <option value="income" {% if request.args.get('type') == 'income' %}selected{% endif %}>Income</option>
-                                <option value="expense" {% if request.args.get('type') == 'expense' %}selected{% endif %}>Expense</option>
+                                <option value="credit" {% if request.args.get('type') == 'credit' %}selected{% endif %}>credit</option>
+                                <option value="debit" {% if request.args.get('type') == 'debit' %}selected{% endif %}>debit</option>
                             </select>
                         </div>
                         <div class="filter-group">
@@ -79,27 +79,36 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Title</th>
-                        <th>Amount</th>
                         <th>Date</th>
+                        <th>Title</th>
                         <th>Category</th>
-                        <th>Type</th>
                         <th>Notes</th>
+                        <th>Credit (₹)</th>
+                        <th>Debit (₹)</th>
+                        <th>Balance (₹)</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for tx in recent_transactions %}
+                    {% for tx in recent_transactions|reverse %}
                     <tr>
-                        <td>{{ tx.title }}</td>
-                        <td style="color: {% if tx.type=='income' %}green{% else %}red{% endif %};">₹{{ tx.amount }}</td>
                         <td>{{ tx.date }}</td>
+                        <td>{{ tx.title }}</td>
                         <td>{{ tx.category }}</td>
-                        <td>{{ tx.type }}</td>
                         <td>{{ tx.notes }}</td>
+                        {% if tx.type == 'credit' %}
+                            <td style="color: green;">{{ tx.amount }}</td>
+                            <td>-</td>
+                        {% else %}
+                            <td>-</td>
+                            <td style="color: red;">{{ tx.amount }}</td>
+                        {% endif %}
+
+                        <td>{{ tx.balance if tx.balance is defined else '-' }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+
             <br>
         </div>
         <script>
@@ -114,6 +123,9 @@
                     toggleFilterBtn.textContent = 'Show Filters';
                 }
             });
+            function toggleMenu() {
+            document.getElementById('navLinks').classList.toggle('show');
+            }
         </script>
     </body>
 </html>
