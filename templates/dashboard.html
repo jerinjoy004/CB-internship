@@ -6,6 +6,32 @@
         <title>Dashboard</title>
         <link rel="stylesheet" href="../static/style.css">
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <style>
+            .dashboard-flex {
+                display: flex;
+                gap: 32px;
+                justify-content: center;
+                align-items: flex-start;
+            }
+            .dashboard-left {
+                flex: 1 1 320px;
+                max-width: 400px;
+            }
+            .dashboard-right {
+                flex: 2 1 600px;
+                min-width: 350px;
+            }
+            @media (max-width: 900px) {
+                .dashboard-flex {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+                .dashboard-left, .dashboard-right {
+                    max-width: 100%;
+                    min-width: 0;
+                }
+            }
+        </style>
     </head>
     <body>
         {% with messages = get_flashed_messages(with_categories=True) %}
@@ -24,138 +50,139 @@
                 <div class="card debit">debit: ₹{{ debit }}</div>
                 <div class="card balance">Balance: ₹{{ balance }}</div>
             </div>
-
-            <br>
-
-            <!-- Add Category Form -->
-            <div class="container">
-                <h3>Add Category</h3>
-                <form method="POST" action="/dashboard#add-category">
-                    <label>Category Name:</label>
-                    <input type="text" id="name" name="name" required>
-                    <label>Type</label>
-                    <select id="type" name="type" required>
-                        <option value="credit">credit</option>
-                        <option value="debit">debit</option>
-                    </select>
-                    <button type="submit" name="form_type" value="add_category">Add Category</button>
-                </form>
-                <hr>
-            </div>
-
-            <!-- Add Transaction Form -->
-            <div class="container">
-                <h3>Add Transaction</h3>
-                <form method="POST" action="/dashboard#add-transaction">
-                    <label for="title">Title</label>
-                    <input type="text" name="title" id="title" required>
-
-                    <label for="amount">Amount (₹)</label>
-                    <input type="number" name="amount" id="amount" step="0.01" required>
-
-                    <label for="date">Date</label>
-                    <input type="date" name="date" id="date" value="{{ current_date }}" required>
-
-                    <label for="categoryID">Category</label>
-                    <select name="categoryID" id="categoryID" required>
-                        {% for c in categories %}
-                        <option value="{{ c.categoryID }}">{{ c.name }} ({{ c.type }})</option>
-                        {% endfor %}
-                    </select>
-
-                    <label for="notes">Notes</label>
-                    <textarea name="notes" id="notes" rows="3"></textarea>
-
-                    <button type="submit" name="form_type" value="add_transaction">Add Transaction</button>
-                </form>
-                <hr>
-            </div>
-
-            <!-- Report/Analysis Section -->
-            <div class="container">
-                <h2>Financial Report & Analysis</h2>
-
-                <!-- Filter Section (moved inside the report box) -->
-                <form method="GET" action="/dashboard" class="filter-form">
-                    <div class="filter-form-row">
-                        <div class="filter-group">
-                            <label for="start_date">Start Date</label>
-                            <input type="date" name="start_date" value="{{ request.args.get('start_date', '') }}">
-                        </div>
-                        <div class="filter-group">
-                            <label for="end_date">End Date</label>
-                            <input type="date" name="end_date" value="{{ request.args.get('end_date', '') }}">
-                        </div>
-                        <div class="filter-group">
-                            <label for="type">Type</label>
-                            <select name="type">
-                                <option value="">All</option>
-                                <option value="credit" {% if request.args.get('type') == 'credit' %}selected{% endif %}>Credit</option>
-                                <option value="debit" {% if request.args.get('type') == 'debit' %}selected{% endif %}>Debit</option>
+            <div class="dashboard-flex">
+                <!-- Left: Add Category & Add Transaction -->
+                <div class="dashboard-left">
+                    <!-- Add Category Form -->
+                    <div class="container">
+                        <h3>Add Category</h3>
+                        <form method="POST" action="/dashboard#add-category">
+                            <label>Category Name:</label>
+                            <input type="text" id="name" name="name" required>
+                            <label>Type</label>
+                            <select id="type" name="type" required>
+                                <option value="credit">credit</option>
+                                <option value="debit">debit</option>
                             </select>
-                        </div>
-                        <div class="filter-group">
-                            <label for="category">Category</label>
-                            <select name="categoryID">
-                                <option value="">All</option>
+                            <button type="submit" name="form_type" value="add_category">Add Category</button>
+                        </form>
+                        <hr>
+                    </div>
+                    <!-- Add Transaction Form -->
+                    <div class="container">
+                        <h3>Add Transaction</h3>
+                        <form method="POST" action="/dashboard#add-transaction">
+                            <label for="title">Title</label>
+                            <input type="text" name="title" id="title" required>
+
+                            <label for="amount">Amount (₹)</label>
+                            <input type="number" name="amount" id="amount" step="0.01" required>
+
+                            <label for="date">Date</label>
+                            <input type="date" name="date" id="date" value="{{ current_date }}" required>
+
+                            <label for="categoryID">Category</label>
+                            <select name="categoryID" id="categoryID" required>
                                 {% for c in categories %}
-                                    <option value="{{ c.categoryID }}" {% if request.args.get('categoryID') == c.categoryID|string %}selected{% endif %}>
-                                        {{ c.name }} ({{ c.type }})
-                                    </option>
+                                <option value="{{ c.categoryID }}">{{ c.name }} ({{ c.type }})</option>
                                 {% endfor %}
                             </select>
+
+                            <label for="notes">Notes</label>
+                            <textarea name="notes" id="notes" rows="3"></textarea>
+
+                            <button type="submit" name="form_type" value="add_transaction">Add Transaction</button>
+                        </form>
+                    </div>
+                </div>
+                <!-- Right: Report/Analysis Section -->
+                <div class="dashboard-right">
+                    <div class="container">
+                        <h2>Financial Report & Analysis</h2>
+
+                        <!-- Filter Section -->
+                        <form method="GET" action="/dashboard" class="filter-form">
+                            <div class="filter-form-row">
+                                <div class="filter-group">
+                                    <label for="start_date">Start Date</label>
+                                    <input type="date" name="start_date" value="{{ request.args.get('start_date', '') }}">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="end_date">End Date</label>
+                                    <input type="date" name="end_date" value="{{ request.args.get('end_date', '') }}">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="type">Type</label>
+                                    <select name="type">
+                                        <option value="">All</option>
+                                        <option value="credit" {% if request.args.get('type') == 'credit' %}selected{% endif %}>Credit</option>
+                                        <option value="debit" {% if request.args.get('type') == 'debit' %}selected{% endif %}>Debit</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="category">Category</label>
+                                    <select name="categoryID">
+                                        <option value="">All</option>
+                                        {% for c in categories %}
+                                            <option value="{{ c.categoryID }}" {% if request.args.get('categoryID') == c.categoryID|string %}selected{% endif %}>
+                                                {{ c.name }} ({{ c.type }})
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label>&nbsp;</label>
+                                    <button type="submit">Apply Filter</button>
+                                </div>
+                                <div class="filter-group">
+                                    <label>&nbsp;</label>
+                                    <a href="/dashboard" class="reset-btn">Reset</a>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div class="stats">
+                            <div class="card credit">Total Credit: ₹{{ total_credit }}</div>
+                            <div class="card debit">Total Debit: ₹{{ total_debit }}</div>
+                            <div class="card balance">Balance: ₹{{ balance }}</div>
                         </div>
-                        <div class="filter-group">
-                            <label>&nbsp;</label>
-                            <button type="submit">Apply Filter</button>
+                        <div>
+                            <h3>Graphs</h3>
+                            <h4>Spending vs Saving</h4>
+                            <canvas id="typeChart"></canvas><br>
+                            <h4>Spending by Category</h4>
+                            <canvas id="categoryChart"></canvas><br>
+                            <h4>Income Over Time</h4>
+                            <canvas id="monthlyChart"></canvas>
                         </div>
-                        <div class="filter-group">
-                            <label>&nbsp;</label>
-                            <a href="/dashboard" class="reset-btn">Reset</a>
+
+                        <!-- Filtered Transactions Table -->
+                        <div>
+                            <h3>Filtered Transactions</h3>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Title</th>
+                                        <th>Category</th>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for tx in transactions %}
+                                    <tr>
+                                        <td>{{ tx.date }}</td>
+                                        <td>{{ tx.title }}</td>
+                                        <td>{{ tx.category }}</td>
+                                        <td>{{ tx.type }}</td>
+                                        <td class="{{ 'credit-amount' if tx.type == 'credit' else 'debit-amount' }}">₹{{ tx.amount }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                </form>
-
-                <div class="stats">
-                    <div class="card credit">Total Credit: ₹{{ total_credit }}</div>
-                    <div class="card debit">Total Debit: ₹{{ total_debit }}</div>
-                    <div class="card balance">Balance: ₹{{ balance }}</div>
-                </div>
-                <div>
-                    <h3>Graphs</h3>
-                    <h4>Spending vs Saving</h4>
-                    <canvas id="typeChart"></canvas><br>
-                    <h4>Spending by Category</h4>
-                    <canvas id="categoryChart"></canvas><br>
-                    <h4>Income Over Time</h4>
-                    <canvas id="monthlyChart"></canvas>
-                </div>
-
-                <!-- Filtered Transactions Table -->
-                <div>
-                    <h3>Filtered Transactions</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Title</th>
-                                <th>Category</th>
-                                <th>Type</th>
-                                <th>Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for tx in transactions %}
-                            <tr>
-                                <td>{{ tx.date }}</td>
-                                <td>{{ tx.title }}</td>
-                                <td>{{ tx.category }}</td>
-                                <td>{{ tx.type }}</td>
-                                <td class="{{ 'credit-amount' if tx.type == 'credit' else 'debit-amount' }}">₹{{ tx.amount }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>
