@@ -71,106 +71,147 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/dashboard')
+@app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     if 'userID' not in session:
         return redirect('/login')
 
+    user_id = session['userID']
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-    user_id = session['userID']
 
-    # Get total credit
-    cursor.execute("""
-        SELECT SUM(t.amount) AS total_credit
-        FROM transactions t
-        JOIN categories c ON t.categoryID = c.categoryID
-        WHERE t.userID = %s AND c.type = 'credit'
-    """, (user_id,))
-    credit = cursor.fetchone().get('total_credit') or 0
+    # Handle Add Category and Add Transaction forms
+    if request.method == 'POST':
+        form_type = request.form.get('form_type')
+        if form_type == 'add_category':
+            name = request.form.get('name')
+            type_ = request.form.get('type')
+            if name and type_:
+                cursor.execute(
+                    "INSERT INTO categories (name, type, userID)"
+                    " VALUES (%s, %s, %s)",
+                    (name, type_, user_id)
+                )
+                conn.commit()
+                flash('Category added successfully!', 'success')
+            else:
+                flash('Please provide all category details.', 'danger')
+        elif form_type == 'add_transaction':
+            title = request.form.get('title')
+            amount = request.form.get('amount')
+            date_ = request.form.get('date')
+            categoryID = request.form.get('categoryID')
+            notes = request.form.get('notes')
+            if title and amount and date_ and categoryID:
+                cursor.execute(
+                    "INSERT INTO transactions "
+                    "(userID, categoryID, title, amount, date, notes)"
+                    " VALUES (%s, %s, %s, %s, %s, %s)",
+                    (user_id, categoryID, title, amount, date_, notes)
+                )
+                conn.commit()
+                flash('Transaction added successfully!', 'success')
+            else:
+                flash('Please provide all transaction details.', 'danger')
+        return redirect('/dashboard')
 
-    # Get total debit
-    cursor.execute("""
-        SELECT SUM(t.amount) AS total_debit
-        FROM transactions t
-        JOIN categories c ON t.categoryID = c.categoryID
-        WHERE t.userID = %s AND c.type = 'debit'
-    """, (user_id,))
-    debit = cursor.fetchone().get('total_debit') or 0
+    # Fetch categories for forms and filters
+    cursor.execute(
+        "SELECT * FROM categories WHERE userID = %s OR userID"
+        " IS NULL", (user_id,))
+    categories = cursor.fetchall()
 
-    # Base query
-    query = """
-        SELECT t.*, c.name AS category, c.type
-        FROM transactions t
-        JOIN categories c ON t.categoryID = c.categoryID
-        WHERE t.userID = %s
-    """
+    # Filter and report logic (similar to your /report route)
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    tx_type = request.args.get('type')
+    category_id = request.args.get('categoryID')
+    min_amount = request.args.get('min_amount')
+    max_amount = request.args.get('max_amount')
+    search_text = request.args.get('search_text')
+
+    query = """SELECT t.*, c.name AS category, c.type
+               FROM transactions t
+               JOIN categories c ON t.categoryID = c.categoryID
+               WHERE t.userID = %s"""
     values = [user_id]
 
-    # Filtering logic
-    if (min_amount := request.args.get('min_amount')):
-        query += " AND t.amount >= %s"
-        values.append(float(min_amount))
-
-    if (max_amount := request.args.get('max_amount')):
-        query += " AND t.amount <= %s"
-        values.append(float(max_amount))
-
-    if (date_from := request.args.get('date_from')):
+    if start_date:
         query += " AND t.date >= %s"
-        values.append(date_from)
-
-    if (date_to := request.args.get('date_to')):
+        values.append(start_date)
+    if end_date:
         query += " AND t.date <= %s"
-        values.append(date_to)
-
-    if (category_id := request.args.get('categoryID')):
+        values.append(end_date)
+    if tx_type:
+        query += " AND c.type = %s"
+        values.append(tx_type)
+    if category_id:
         query += " AND t.categoryID = %s"
         values.append(int(category_id))
-
-    if (search_text := request.args.get('search_text')):
-        search = f"%{search_text}%"
+    if min_amount:
+        query += " AND t.amount >= %s"
+        values.append(float(min_amount))
+    if max_amount:
+        query += " AND t.amount <= %s"
+        values.append(float(max_amount))
+    if search_text:
         query += " AND (t.title LIKE %s OR t.notes LIKE %s)"
-        values += [search, search]
-
-    if (type_filter := request.args.get('type')):
-        query += " AND c.type = %s"
-        values.append(type_filter)
+        values.extend([f"%{search_text}%", f"%{search_text}%"])
 
     query += " ORDER BY t.date DESC"
     cursor.execute(query, values)
     transactions = cursor.fetchall()
-    # Sort transactions by date ascending for running balance
-    transactions.sort(key=lambda x: x['date'])
 
-    running_balance = 0
+    # Calculate stats for report
+    total_credit = sum(t['amount']
+                       for t in transactions if t['type'] == 'credit')
+    total_debit = sum(t['amount']
+                      for t in transactions if t['type'] == 'debit')
+    balance = total_credit - total_debit
+
+    from collections import defaultdict
+    category_spend = defaultdict(float)
+    monthly_income = defaultdict(float)
+    monthly_expense = defaultdict(float)
+
     for tx in transactions:
+        if tx['type'] == 'debit':
+            category_spend[tx['category']] += float(tx['amount'])
+            monthly_expense[
+                tx['date'].strftime('%Y-%m')
+            ] += float(tx['amount'])
         if tx['type'] == 'credit':
-            running_balance += float(tx['amount'])
-        else:
-            running_balance -= float(tx['amount'])
-        tx['balance'] = round(running_balance, 2)
+            monthly_income[tx['date'].strftime('%Y-%m')] += float(tx['amount'])
 
-# Reverse back if needed for display (latest first)
-    transactions.reverse()
+    category_labels = list(category_spend.keys())
+    category_values = list(category_spend.values())
+    monthly_income_labels = list(monthly_income.keys())
+    monthly_income_values = list(monthly_income.values())
+    monthly_expense_labels = list(monthly_expense.keys())
+    monthly_expense_values = list(monthly_expense.values())
 
-    # Load categories
-    cursor.execute("""
-        SELECT * FROM categories
-        WHERE userID = %s OR userID IS NULL
-    """, (user_id,))
-    categories = cursor.fetchall()
+    from datetime import date
+    current_date = date.today().isoformat()
 
     cursor.close()
     conn.close()
 
     return render_template(
         'dashboard.html',
-        credit=credit,
-        debit=debit,
-        balance=credit - debit,
-        recent_transactions=transactions,
-        categories=categories
+        credit=total_credit,
+        debit=total_debit,
+        balance=balance,
+        total_credit=total_credit,
+        total_debit=total_debit,
+        categories=categories,
+        category_labels=category_labels,
+        category_values=category_values,
+        monthly_income_labels=monthly_income_labels,
+        monthly_income_values=monthly_income_values,
+        monthly_expense_labels=monthly_expense_labels,
+        monthly_expense_values=monthly_expense_values,
+        current_date=current_date,
+        transactions=transactions,
     )
 
 
