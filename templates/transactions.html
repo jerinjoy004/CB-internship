@@ -27,7 +27,7 @@
             <input type="number" name="amount" id="amount" step="0.01" required>
 
             <label for="date">Date</label>
-            <input type="datetime-local" name="date" id="date" required>
+            <input type="date" name="date" id="date" value="{{ current_date }}" required>
 
             <label for="categoryID">Category</label>
             <select name="categoryID" id="categoryID" required>
@@ -42,5 +42,11 @@
             <button type="submit">Add Transaction</button>
             </form>
         </div>
+        <script>
+            function toggleMenu() {
+            document.getElementById('navLinks').classList.toggle('show');
+            }
+        </script>
+
     </body>
 </html>

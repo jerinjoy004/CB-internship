@@ -96,13 +96,13 @@ button:hover {
   font-weight: 600;
 }
 
-.card.income {
+.card.credit {
   background-color: #1e3f2c;
   border-left: 6px solid #3fd28b;
   color: #c3fdd0;
 }
 
-.card.expense {
+.card.debit {
   background-color: #3f1e1e;
   border-left: 6px solid #ff6b6b;
   color: #ffc9c9;
@@ -278,3 +278,111 @@ input[type="date"]:focus {
     background-color: #32855a;
 }
 
+/* === Responsive Styles === */
+
+@media (max-width: 768px) {
+  .stats {
+    flex-direction: column;
+  }
+
+  .card {
+    width: 100%;
+  }
+
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .navbar > div:last-child {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .navbar a {
+    padding: 10px 0;
+    margin-left: 0;
+  }
+
+  .filter-form-row {
+    flex-direction: column;
+  }
+
+  .filter-group {
+    width: 100%;
+  }
+
+  table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  th, td {
+    white-space: nowrap;
+    min-width: 120px;
+  }
+}
+
+/* Ultra small screens */
+@media (max-width: 480px) {
+  .navbar {
+    padding: 10px 15px;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .filter-group label {
+    font-size: 0.8rem;
+  }
+
+  th, td {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+}
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+}
+
+#menuToggle {
+  display: none;
+  font-size: 24px;
+  color: #5ec576;
+}
+
+@media (max-width: 768px) {
+  #menuToggle {
+    display: block;
+  }
+
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .nav-links a {
+    padding: 10px 0;
+    border-top: 1px solid #333;
+  }
+
+  .nav-links.show {
+    display: flex;
+  }
+}
