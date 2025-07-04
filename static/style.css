@@ -1,4 +1,3 @@
-
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;
@@ -55,8 +54,11 @@ button {
   transition: background-color 0.2s ease;
 }
 
-button:hover {
-  background-color: #4bb465;
+button, .filter-group button, .reset-btn {
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+button:hover, .filter-group button:hover, .reset-btn:hover {
+    box-shadow: 0 2px 8px #5ec57644;
 }
 
 
@@ -278,6 +280,25 @@ input[type="date"]:focus {
     background-color: #32855a;
 }
 
+.logout-btn {
+    background: #ff6b6b;
+    color: #fff;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 1rem;
+    box-shadow: 0 2px 8px #ff6b6b44;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    border: none;
+    display: inline-block;
+}
+.logout-btn:hover {
+    background: #c0392b;
+    color: #fff;
+    box-shadow: 0 4px 16px #ff6b6b66;
+}
+
 /* === Responsive Styles === */
 
 @media (max-width: 768px) {
@@ -385,4 +406,40 @@ input[type="date"]:focus {
   .nav-links.show {
     display: flex;
   }
+}
+
+.dashboard-flex {
+    position: relative;
+}
+@media (min-width: 900px) {
+  .dashboard-flex::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #222c;
+    border-radius: 2px;
+    transform: translateX(-50%);
+    z-index: 0;
+  }
+  .dashboard-left, .dashboard-right {
+    position: relative;
+    z-index: 1;
+  }
+
+  th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+}
+
+.dashboard-container, .container {
+    animation: fadeIn 0.7s;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px);}
+  to { opacity: 1; transform: none;}
 }

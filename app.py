@@ -121,6 +121,19 @@ def dashboard():
         " IS NULL", (user_id,))
     categories = cursor.fetchall()
 
+    # Calculate global stats (no filter)
+    cursor.execute(
+        """SELECT t.amount, c.type
+           FROM transactions t
+           JOIN categories c ON t.categoryID = c.categoryID
+           WHERE t.userID = %s""",
+        (user_id,)
+    )
+    all_transactions = cursor.fetchall()
+    global_credit = sum(t['amount'] for t in all_transactions if t['type'] == 'credit')
+    global_debit = sum(t['amount'] for t in all_transactions if t['type'] == 'debit')
+    global_balance = global_credit - global_debit
+
     # Filter and report logic (similar to your /report route)
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
@@ -167,7 +180,7 @@ def dashboard():
                        for t in transactions if t['type'] == 'credit')
     total_debit = sum(t['amount']
                       for t in transactions if t['type'] == 'debit')
-    balance = total_credit - total_debit
+    total_balance = total_credit - total_debit
 
     from collections import defaultdict
     category_spend = defaultdict(float)
@@ -198,11 +211,12 @@ def dashboard():
 
     return render_template(
         'dashboard.html',
-        credit=total_credit,
-        debit=total_debit,
-        balance=balance,
+        credit=global_credit,
+        debit=global_debit,
+        balance=global_balance,
         total_credit=total_credit,
         total_debit=total_debit,
+        total_balance=total_balance,
         categories=categories,
         category_labels=category_labels,
         category_values=category_values,

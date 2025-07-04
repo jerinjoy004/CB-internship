@@ -43,61 +43,72 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
+
+        <!-- Logout Button Top Right -->
+        <div style="position: absolute; top: 24px; right: 40px; z-index: 10;">
+            <a href="/logout" class="logout-btn">Logout</a>
+        </div>
+
         <div class="dashboard-container">
             <h2>Welcome to your Dashboard, {{ session['name'] }}!</h2>
+            <!-- Always show total stats at the top -->
             <div class="stats">
-                <div class="card credit">credit: ₹{{ credit }}</div>
-                <div class="card debit">debit: ₹{{ debit }}</div>
-                <div class="card balance">Balance: ₹{{ balance }}</div>
+                <div class="card credit">Total Credit: ₹{{ credit }}</div>
+                <div class="card debit">Total Debit: ₹{{ debit }}</div>
+                <div class="card balance">Total Balance: ₹{{ balance }}</div>
             </div>
             <div class="dashboard-flex">
                 <!-- Left: Add Category & Add Transaction -->
                 <div class="dashboard-left">
-                    <!-- Add Category Form -->
-                    <div class="container">
-                        <h3>Add Category</h3>
-                        <form method="POST" action="/dashboard#add-category">
-                            <label>Category Name:</label>
-                            <input type="text" id="name" name="name" required>
-                            <label>Type</label>
-                            <select id="type" name="type" required>
-                                <option value="credit">credit</option>
-                                <option value="debit">debit</option>
-                            </select>
-                            <button type="submit" name="form_type" value="add_category">Add Category</button>
-                        </form>
+                    <!-- Quick Actions Section -->
+                    <div class="container" style="margin-bottom: 32px;">
+                        <h2 style="color:#aad1bc;">Quick Actions</h2>
+                        <!-- Add Category Form -->
+                        <div>
+                            <h3>Add Category</h3>
+                            <form method="POST" action="/dashboard#add-category">
+                                <label>Category Name:</label>
+                                <input type="text" id="name" name="name" required>
+                                <label>Type</label>
+                                <select id="type" name="type" required>
+                                    <option value="credit">credit</option>
+                                    <option value="debit">debit</option>
+                                </select>
+                                <button type="submit" name="form_type" value="add_category">Add Category</button>
+                            </form>
+                        </div>
                         <hr>
-                    </div>
-                    <!-- Add Transaction Form -->
-                    <div class="container">
-                        <h3>Add Transaction</h3>
-                        <form method="POST" action="/dashboard#add-transaction">
-                            <label for="title">Title</label>
-                            <input type="text" name="title" id="title" required>
+                        <!-- Add Transaction Form -->
+                        <div>
+                            <h3>Add Transaction</h3>
+                            <form method="POST" action="/dashboard#add-transaction">
+                                <label for="title">Title</label>
+                                <input type="text" name="title" id="title" required>
 
-                            <label for="amount">Amount (₹)</label>
-                            <input type="number" name="amount" id="amount" step="0.01" required>
+                                <label for="amount">Amount (₹)</label>
+                                <input type="number" name="amount" id="amount" step="0.01" required>
 
-                            <label for="date">Date</label>
-                            <input type="date" name="date" id="date" value="{{ current_date }}" required>
+                                <label for="date">Date</label>
+                                <input type="date" name="date" id="date" value="{{ current_date }}" required>
 
-                            <label for="categoryID">Category</label>
-                            <select name="categoryID" id="categoryID" required>
-                                {% for c in categories %}
-                                <option value="{{ c.categoryID }}">{{ c.name }} ({{ c.type }})</option>
-                                {% endfor %}
-                            </select>
+                                <label for="categoryID">Category</label>
+                                <select name="categoryID" id="categoryID" required>
+                                    {% for c in categories %}
+                                    <option value="{{ c.categoryID }}">{{ c.name }} ({{ c.type }})</option>
+                                    {% endfor %}
+                                </select>
 
-                            <label for="notes">Notes</label>
-                            <textarea name="notes" id="notes" rows="3"></textarea>
+                                <label for="notes">Notes</label>
+                                <textarea name="notes" id="notes" rows="3"></textarea>
 
-                            <button type="submit" name="form_type" value="add_transaction">Add Transaction</button>
-                        </form>
+                                <button type="submit" name="form_type" value="add_transaction">Add Transaction</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
                 <!-- Right: Report/Analysis Section -->
                 <div class="dashboard-right">
-                    <div class="container">
+                    <div class="container" style="box-shadow: 0 2px 16px rgba(94,197,118,0.08); border: 1px solid #223;">
                         <h2>Financial Report & Analysis</h2>
 
                         <!-- Filter Section -->
@@ -141,11 +152,13 @@
                             </div>
                         </form>
 
+                        <!-- Show filtered stats here -->
                         <div class="stats">
-                            <div class="card credit">Total Credit: ₹{{ total_credit }}</div>
-                            <div class="card debit">Total Debit: ₹{{ total_debit }}</div>
-                            <div class="card balance">Balance: ₹{{ balance }}</div>
+                            <div class="card credit">Filtered Credit: ₹{{ total_credit }}</div>
+                            <div class="card debit">Filtered Debit: ₹{{ total_debit }}</div>
+                            <div class="card balance">Filtered Balance: ₹{{ total_balance }}</div>
                         </div>
+
                         <div>
                             <h3>Graphs</h3>
                             <h4>Spending vs Saving</h4>
