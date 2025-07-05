@@ -65,7 +65,16 @@
                         <h2 style="color:#aad1bc;">Quick Actions</h2>
                         <!-- Add Category Form -->
                         <div>
-                            <h3>Add Category</h3>
+                            <h3 style="display: flex; align-items: center; justify-content: space-between;">
+                                Add Category
+                                <a href="/categories" 
+                                   class="filter-group button" 
+                                   style="margin-left: 12px; font-size: 0.95em; padding: 4px 14px; background: #3fd28b; color: #fff; border-radius: 4px; text-decoration: none; transition: background 0.2s;"
+                                   onmouseover="this.style.background='#2bb673';" 
+                                   onmouseout="this.style.background='#3fd28b';">
+                                    Manage Categories
+                                </a>
+                            </h3>
                             <form method="POST" action="/dashboard#add-category">
                                 <label>Category Name:</label>
                                 <input type="text" id="name" name="name" required>
@@ -151,7 +160,20 @@
                                 </div>
                             </div>
                         </form>
+                        <form id="exportForm" method="POST" action="/export_pdf">
+                            <input type="hidden" name="start_date" value="{{ request.args.get('start_date', '') }}">
+                            <input type="hidden" name="end_date" value="{{ request.args.get('end_date', '') }}">
+                            <input type="hidden" name="type" value="{{ request.args.get('type', '') }}">
+                            <input type="hidden" name="categoryID" value="{{ request.args.get('categoryID', '') }}">
 
+                            <!-- Hidden image inputs for chart base64s -->
+                            <input type="hidden" id="typeChartImg" name="typeChart_img">
+                            <input type="hidden" id="categoryChartImg" name="categoryChart_img">
+                            <input type="hidden" id="monthlyChartImg" name="monthlyChart_img">
+
+                            <button type="submit" class="export-btn">Export as PDF</button>
+                        </form>
+                        <br>
                         <!-- Show filtered stats here -->
                         <div class="stats">
                             <div class="card credit">Filtered Credit: ₹{{ total_credit }}</div>
@@ -279,6 +301,27 @@
                         y: { beginAtZero: true }
                     }
                 }
+            });
+
+            document.addEventListener("DOMContentLoaded", function () {
+                const form = document.getElementById('exportForm');
+                if (!form) return;
+
+                const typeChart = document.getElementById('typeChart');
+                const categoryChart = document.getElementById('categoryChart');
+                const monthlyChart = document.getElementById('monthlyChart');
+
+                form.addEventListener('submit', function (e) {
+                    if (typeChart) {
+                        document.getElementById('typeChartImg').value = typeChart.toDataURL();
+                    }
+                    if (categoryChart) {
+                        document.getElementById('categoryChartImg').value = categoryChart.toDataURL();
+                    }
+                    if (monthlyChart) {
+                        document.getElementById('monthlyChartImg').value = monthlyChart.toDataURL();
+                    }
+                });
             });
         </script>
     </body>

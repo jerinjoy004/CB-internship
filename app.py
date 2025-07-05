@@ -5,6 +5,8 @@ import os
 from datetime import date, datetime
 from dotenv import load_dotenv
 from collections import defaultdict
+from weasyprint import HTML
+from flask import make_response
 
 load_dotenv()
 
@@ -227,6 +229,90 @@ def dashboard():
         current_date=current_date,
         transactions=transactions,
     )
+
+
+@app.route('/export_pdf', methods=['POST'])
+def export_pdf():
+    if 'userID' not in session:
+        return redirect('/login')
+
+    user_id = session['userID']
+    username = session['name']
+
+    # Get filter params from hidden inputs
+    filters = {
+        'start_date': request.form.get('start_date'),
+        'end_date': request.form.get('end_date'),
+        'type': request.form.get('type'),
+        'categoryID': request.form.get('categoryID')
+    }
+
+    # Fetch filtered transactions and summary
+    transactions, summary_data = get_filtered_data(user_id, filters)
+
+    # Get base64 chart images
+    chart_images = {
+        'typeChart_img': request.form.get('typeChart_img'),
+        'categoryChart_img': request.form.get('categoryChart_img'),
+        'monthlyChart_img': request.form.get('monthlyChart_img')
+    }
+
+    # Render HTML
+    rendered = render_template('report_pdf.html',
+                               username=username,
+                               current_date=date.today().strftime("%B %d, %Y"),
+                               transactions=transactions,
+                               **summary_data,
+                               **chart_images)
+
+    # Generate PDF
+    pdf = HTML(string=rendered).write_pdf()
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = 'attachment; filename=financial_report.pdf'
+    return response
+
+
+def get_filtered_data(user_id, filters):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    query = """SELECT t.*, c.name AS category, c.type
+               FROM transactions t
+               JOIN categories c ON t.categoryID = c.categoryID
+               WHERE t.userID = %s"""
+    values = [user_id]
+
+    if filters['start_date']:
+        query += " AND t.date >= %s"
+        values.append(filters['start_date'])
+    if filters['end_date']:
+        query += " AND t.date <= %s"
+        values.append(filters['end_date'])
+    if filters['type']:
+        query += " AND c.type = %s"
+        values.append(filters['type'])
+    if filters['categoryID']:
+        query += " AND t.categoryID = %s"
+        values.append(int(filters['categoryID']))
+
+    query += " ORDER BY t.date DESC"
+    cursor.execute(query, values)
+    transactions = cursor.fetchall()
+
+    # Summary
+    total_credit = sum(t['amount'] for t in transactions if t['type'] == 'credit')
+    total_debit = sum(t['amount'] for t in transactions if t['type'] == 'debit')
+    total_balance = total_credit - total_debit
+
+    cursor.close()
+    conn.close()
+
+    return transactions, {
+        'total_credit': total_credit,
+        'total_debit': total_debit,
+        'total_balance': total_balance
+    }
 
 
 @app.route('/categories', methods=['GET', 'POST'])
