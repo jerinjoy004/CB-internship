@@ -42,16 +42,20 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for category in categories %}
+                    {% for c in categories %}
                     <tr>
-                        <td>{{ category.name }}</td>
-                        <td>{{ category.type }}</td>
+                        <td>{{ c.name }}</td>
+                        <td>{{ c.type }}</td>
                         <td>
-                            <form action="/edit_category/{{ category.categoryID }}" style="display: inline;">
-                                <button type="submit" style="background: none;border: none;color: #007bff;cursor:pointer;padding:0;">Edit</button>
-                            </form> | 
-                            <form action="/delete_category/{{ category.categoryID }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure?');">
-                                <button type="submit" style="background:none;border:none;color:#007bff;cursor:pointer;padding:0;">Delete</button>
+                            <a href="/edit_category/{{ c.categoryID }}" 
+                               class="filter-group button"
+                               style="background: #3fd28b; color: black; border-radius: 4px; padding: 4px 9px; font-size: 1em; text-decoration: none; transition: background 0.2s;"
+                               onmouseover="this.style.background='#2bb673';" 
+                               onmouseout="this.style.background='#3fd28b';">
+                                Edit
+                            </a>
+                            <form method="POST" action="/delete_category/{{ c.categoryID }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this category?');">
+                                <button type="submit" class="filter-group button" style="background:#ff6b6b;">Delete</button>
                             </form>
                         </td>
                     </tr>
