@@ -1,3 +1,3 @@
 # intern_project
 
-basic personal finance manager.
+personal finance manager.
