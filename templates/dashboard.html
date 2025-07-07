@@ -19,7 +19,7 @@
             }
             .dashboard-right {
                 flex: 2 1 600px;
-                min-width: 350px;
+                min-width: 380px;
             }
             @media (max-width: 900px) {
                 .dashboard-flex {
@@ -34,16 +34,17 @@
         </style>
     </head>
     <body>
-        {% with messages = get_flashed_messages(with_categories=True) %}
-        {% if messages %}
-        {% for category, message in messages %}
-        <div class="{% if category == 'success' %}success-message{% elif category == 'danger' %}danger-message{% else %}default-message{% endif %}">
-            {{ message }}
+        <div class="flash-message">
+            {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="{% if category == 'success' %}success-message{% elif category == 'danger' %}danger-message{% else %}default-message{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
         </div>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
-
         <!-- Logout Button Top Right -->
         <div style="position: absolute; top: 24px; right: 40px; z-index: 10;">
             <a href="/logout" class="logout-btn">Logout</a>
@@ -117,7 +118,7 @@
                 </div>
                 <!-- Right: Report/Analysis Section -->
                 <div class="dashboard-right">
-                    <div class="container" style="box-shadow: 0 2px 16px rgba(94,197,118,0.08); border: 1px solid #223;">
+                    <div class="container" style="box-shadow: 0 2px 16px rgba(94,197,118,0.08); border: 1px solid #223; width: 100%;">
                         <h2>Financial Report & Analysis</h2>
 
                         <!-- Filter Section -->
@@ -200,8 +201,10 @@
                                         <th>Date</th>
                                         <th>Title</th>
                                         <th>Category</th>
-                                        <th>Type</th>
-                                        <th>Amount</th>
+                                        <th>Notes</th>
+                                        <th>Credit</th>
+                                        <th>Debit</th>
+                                        <th>Balance</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -210,8 +213,10 @@
                                         <td>{{ tx.date }}</td>
                                         <td>{{ tx.title }}</td>
                                         <td>{{ tx.category }}</td>
-                                        <td>{{ tx.type }}</td>
-                                        <td class="{{ 'credit-amount' if tx.type == 'credit' else 'debit-amount' }}">₹{{ tx.amount }}</td>
+                                        <td>{{ tx.notes }}</td>
+                                        <td class="amount-credit">{% if tx.credit %}₹{{ '%.2f'|format(tx.credit) }}{% else %}-{% endif %}</td>
+                                        <td class="amount-debit">{% if tx.debit %}₹{{ '%.2f'|format(tx.debit) }}{% else %}-{% endif %}</td>
+                                        <td>₹{{ '%.2f'|format(tx.running_balance) }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -323,6 +328,15 @@
                     }
                 });
             });
+
+            // Auto-hide flash messages after 3 seconds
+            setTimeout(() => {
+                document.querySelectorAll('.flash-message').forEach(el => {
+                el.style.transition = "opacity 0.5s ease";
+                el.style.opacity = 0;
+                setTimeout(() => el.remove(), 500);
+                });
+            }, 3000);
         </script>
     </body>
 </html>
