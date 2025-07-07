@@ -450,3 +450,15 @@ input[type="date"]:focus {
 .amount-debit {
   color: red
 }
+
+.nav-btn {
+    background: #3fd28b;
+    color: white;
+    padding: 6px 14px;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+}
+.nav-btn:hover {
+    background: #2bb673;
+}

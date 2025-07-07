@@ -193,8 +193,12 @@
                         </div>
 
                         <!-- Filtered Transactions Table -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0;">
+                            <a href="/dashboard?month={{ (selected_month | to_datetime('%Y-%m') - timedelta(days=1)).strftime('%Y-%m') }}" class="nav-btn">← Previous Month</a>
+                            <h3 style="margin: 0;">Showing Transactions for: {{ selected_month }}</h3>
+                            <a href="/dashboard?month={{ (selected_month | to_datetime('%Y-%m') + timedelta(days=31)).strftime('%Y-%m') }}" class="nav-btn">Next Month →</a>
+                        </div>
                         <div>
-                            <h3>Filtered Transactions</h3>
                             <table>
                                 <thead>
                                     <tr>
@@ -262,7 +266,7 @@
                     datasets: [{
                         label: 'Spend by Category',
                         data: {{ category_values|tojson }},
-                        backgroundColor: '#5ec576'
+                        backgroundColor: '#ff6b6b'
                     }]
                 },
                 options: {
