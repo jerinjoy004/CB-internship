@@ -290,6 +290,8 @@ def export_pdf():
                                username=username,
                                current_date=date.today().strftime("%B %d, %Y"),
                                transactions=transactions,
+                               from_date=filters['start_date'],
+                               to_date=filters['end_date'],
                                **summary_data,
                                **chart_images)
 
