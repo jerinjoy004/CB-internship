@@ -443,3 +443,10 @@ input[type="date"]:focus {
   from { opacity: 0; transform: translateY(20px);}
   to { opacity: 1; transform: none;}
 }
+
+.amount-credit {
+  color: green
+}
+.amount-debit {
+  color: red
+}

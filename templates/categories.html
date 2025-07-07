@@ -7,16 +7,18 @@
         <link rel="stylesheet" href="../static/style.css">
     </head>
     <body>
-        {% with messages = get_flashed_messages(with_categories=True) %}
-        {% if messages %}
-        {% for category, message in messages %}
-        <div class="{% if category == 'success' %}success-message{% elif category == 'danger' %}danger-message{% else %}default-message{% endif %}">
-            {{ message }}
-        </div>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
-        {% include 'navbar.html' %}
+        <div class="flash-message">
+            {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="{% if category == 'success' %}success-message{% elif category == 'danger' %}danger-message{% else %}default-message{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+            {% include 'navbar.html' %}
+        </div
 
         <div class="container">
             <h2>Manage Categories</h2>
@@ -67,6 +69,14 @@
             function toggleMenu() {
             document.getElementById('navLinks').classList.toggle('show');
             }
+
+            setTimeout(() => {
+                document.querySelectorAll('.flash-message').forEach(el => {
+                el.style.transition = "opacity 0.5s ease";
+                el.style.opacity = 0;
+                setTimeout(() => el.remove(), 500);
+                });
+            }, 3000);
         </script>
 
     </body>

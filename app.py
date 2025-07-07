@@ -208,6 +208,34 @@ def dashboard():
     from datetime import date
     current_date = date.today().isoformat()
 
+    sorted_tx = sorted(transactions, key=lambda x: x['date'])
+    running_balance = 0
+    tx_with_balance = []
+    for tx in sorted_tx:
+        if tx['type'] == 'credit':
+            running_balance += tx['amount']
+            tx_with_balance.append({
+                'date': tx['date'],
+                'title': tx['title'],
+                'category': tx['category'],
+                'notes': tx['notes'],
+                'credit': tx['amount'],
+                'debit': 0,
+                'running_balance': running_balance
+            })
+        else:
+            running_balance -= tx['amount']
+            tx_with_balance.append({
+                'date': tx['date'],
+                'title': tx['title'],
+                'category': tx['category'],
+                'notes': tx['notes'],
+                'credit': 0,
+                'debit': tx['amount'],
+                'running_balance': running_balance
+            })
+    tx_with_balance.reverse()  # Show latest transactions first
+
     cursor.close()
     conn.close()
 
@@ -227,7 +255,7 @@ def dashboard():
         monthly_expense_labels=monthly_expense_labels,
         monthly_expense_values=monthly_expense_values,
         current_date=current_date,
-        transactions=transactions,
+        transactions=tx_with_balance
     )
 
 
