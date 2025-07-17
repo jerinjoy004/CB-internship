@@ -8,7 +8,6 @@ A full-stack personal finance tracker built with Flask. Add transactions, manage
 - Add/Edit categories and transactions
 - Filter by date, type, category
 - Dynamic graphs (Pie, Bar, Line) using Chart.js
-- Smart month filtering (after/before 9th)
 - Export filtered reports as PDFs (with charts)
 - Previous/Next month navigation
 
